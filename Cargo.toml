@@ -1,0 +1,8 @@
+[package]
+name = "picsorter"
+version = "0.1.0"
+authors = ["gquiniou <gquiniou@gmail.com>"]
+
+[dependencies]
+rexiv2 = "0.4.1"
+chrono = "0.2"
