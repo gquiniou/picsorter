@@ -28,12 +28,14 @@ fn processpic(path: &Path) {
         match rexiv2::Metadata::new_from_path(path) {
             Ok(meta) => {
                 if meta.has_tag("Exif.Photo.DateTimeOriginal") {
-                    //println!("    Exif.Photo.DateTimeOriginal  {:?}", meta.get_tag_string("Exif.Photo.DateTimeOriginal").unwrap());
+                    println!("    Exif.Photo.DateTimeOriginal  {:?}", meta.get_tag_string("Exif.Photo.DateTimeOriginal").unwrap());
                     let d = NaiveDateTime::parse_from_str(&meta.get_tag_string("Exif.Photo.DateTimeOriginal").unwrap(), "%Y:%m:%d %H:%M:%S").unwrap();
                     let mut f = get_target_folder(d, path.parent().unwrap());
                     f.push(path.file_name().unwrap());
                     println!("Moving '{:?}' to '{:?}'", path, f);
                     fs::rename(path, f);
+                } else {
+                    println!("no Exif.Photo.DateTimeOriginal");
                 }
             },
             Err(err) => match err {
