@@ -9,13 +9,13 @@ use std::fs;
 
 fn processfolder(path: &Path) {
     match path.read_dir() {
-        Err(why) => println!("Could not access folder '{:?}':  {:?}", path, why.kind()),
+        Err(why) => eprintln!("Could not access folder '{:?}':  {:?}", path, why.kind()),
         Ok(entries) => {
             for entry in entries {
                 if let Ok(entry) = entry {
                     processpic(entry.path().as_path());
                 }  else {
-                    println!("could not get entry {:?}", entry);
+                    eprintln!("could not get entry {:?}", entry);
                 }
             }
         }
@@ -34,7 +34,7 @@ fn processpic(path: &Path) {
                     f.push(path.file_name().unwrap());
                     println!("Moving '{:?}' to '{:?}'", path, f);
                     match fs::rename(path, f) {
-                        Err(why) => println!("Could not move file: {:?}", why.kind()),
+                        Err(why) => eprintln!("Could not move file: {:?}", why.kind()),
                         Ok(_) => {},
                     }
                 } else {
@@ -42,9 +42,9 @@ fn processpic(path: &Path) {
                 }
             },
             Err(err) => match err {
-                NoValue => println!("    Could not get metadata for {:?}: unspecified error", path),
-                Utf8(utf8err) => println!("    Could not get metadata for {:?}: {:?}", path, utf8err),
-                Internal(interr) => println!("    Could not get metadata for {:?}: {:?}", path, interr.unwrap_or(String::from("unspecified"))),
+                NoValue => eprintln!("    Could not get metadata for {:?}: unspecified error", path),
+                Utf8(utf8err) => eprintln!("    Could not get metadata for {:?}: {:?}", path, utf8err),
+                Internal(interr) => eprintln!("    Could not get metadata for {:?}: {:?}", path, interr.unwrap_or(String::from("unspecified"))),
             }
         }
     }
@@ -55,7 +55,7 @@ fn get_target_folder(date: NaiveDateTime, parent: &Path) -> PathBuf {
     let newpath = parent.join(dirname);
     if !newpath.exists() {
         match fs::create_dir(&newpath) {
-            Err(why) => println!("Could not create dir ! {:?}", why.kind()),
+            Err(why) => eprintln!("Could not create dir ! {:?}", why.kind()),
             Ok(_) => {},
         }
     }
@@ -66,17 +66,16 @@ fn main() {
    let myargs: Vec<String> = env::args().collect();
 
    if myargs.len() == 1 {
-       println!("usage: picsorter <directory>");
-   } else {
-
-       for myarg in myargs.iter().skip(1) {
-
-         let mypath = Path::new(myarg);
-	 if !mypath.is_dir() {
-	    println!("'{:?}' is not a directory", mypath);
-	 } else {
-             processfolder(mypath);
-         } 
-     }
+       eprintln!("usage: picsorter <directory>");
+    } else {
+    
+        for myarg in myargs.iter().skip(1) {
+            let mypath = Path::new(myarg);
+            if !mypath.is_dir() {
+                eprintln!("'{:?}' is not a directory", mypath);
+            } else {
+                processfolder(mypath);
+            } 
+        }
    }   
 }
