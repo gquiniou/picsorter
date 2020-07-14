@@ -23,8 +23,8 @@ fn processfolder(path: &Path) {
 }
 
 fn processpic(path: &Path) {
-    println!("*Processing file {:?}", path);
     if ! path.is_dir() {
+        println!("*Processing file {:?}", path);
         match rexiv2::Metadata::new_from_path(path) {
             Ok(meta) => {
                 if meta.has_tag("Exif.Photo.DateTimeOriginal") {
@@ -33,7 +33,10 @@ fn processpic(path: &Path) {
                     let mut f = get_target_folder(d, path.parent().unwrap());
                     f.push(path.file_name().unwrap());
                     println!("Moving '{:?}' to '{:?}'", path, f);
-                    fs::rename(path, f);
+                    match fs::rename(path, f) {
+                        Err(why) => println!("Could not move file: {:?}", why.kind()),
+                        Ok(_) => {},
+                    }
                 } else {
                     println!("no Exif.Photo.DateTimeOriginal");
                 }
@@ -52,17 +55,11 @@ fn get_target_folder(date: NaiveDateTime, parent: &Path) -> PathBuf {
     let newpath = parent.join(dirname);
     if !newpath.exists() {
         match fs::create_dir(&newpath) {
-            Err(why) => println!("! {:?}", why.kind()),
+            Err(why) => println!("Could not create dir ! {:?}", why.kind()),
             Ok(_) => {},
         }
     }
     return newpath;
-}
-
-fn movepic() {
-}
-
-fn getexifdate() {
 }
 
 fn main() {
