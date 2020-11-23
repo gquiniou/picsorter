@@ -33,9 +33,8 @@ fn processpic(path: &Path) {
                     let mut f = get_target_folder(d, path.parent().unwrap());
                     f.push(path.file_name().unwrap());
                     println!("Moving '{:?}' to '{:?}'", path, f);
-                    match fs::rename(path, f) {
-                        Err(why) => eprintln!("Could not move file: {:?}", why.kind()),
-                        Ok(_) => {},
+                    if let Err(why) = fs::rename(path, f) { 
+                        eprintln!("Could not move file: {:?}", why.kind()) 
                     }
                 } else {
                     println!("no Exif.Photo.DateTimeOriginal");
@@ -44,7 +43,7 @@ fn processpic(path: &Path) {
             Err(err) => match err {
                 NoValue => eprintln!("    Could not get metadata for {:?}: unspecified error", path),
                 Utf8(utf8err) => eprintln!("    Could not get metadata for {:?}: {:?}", path, utf8err),
-                Internal(interr) => eprintln!("    Could not get metadata for {:?}: {:?}", path, interr.unwrap_or(String::from("unspecified"))),
+                Internal(interr) => eprintln!("    Could not get metadata for {:?}: {:?}", path, interr.unwrap_or_else(|| String::from("unspecified"))),
             }
         }
     }
@@ -54,12 +53,11 @@ fn get_target_folder(date: NaiveDateTime, parent: &Path) -> PathBuf {
     let dirname = format!("{} {:02}", date.year(), date.month());
     let newpath = parent.join(dirname);
     if !newpath.exists() {
-        match fs::create_dir(&newpath) {
-            Err(why) => eprintln!("Could not create dir ! {:?}", why.kind()),
-            Ok(_) => {},
-        }
+        if let Err(why) = fs::create_dir(&newpath) { 
+            eprintln!("Could not create dir ! {:?}", why.kind()) 
+        }         
     }
-    return newpath;
+    newpath
 }
 
 fn main() {
@@ -68,7 +66,6 @@ fn main() {
    if myargs.len() == 1 {
        eprintln!("usage: picsorter <directory>");
     } else {
-    
         for myarg in myargs.iter().skip(1) {
             let mypath = Path::new(myarg);
             if !mypath.is_dir() {
